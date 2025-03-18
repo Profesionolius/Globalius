@@ -1,0 +1,100 @@
+te<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Globalius Game</title>
+</head>
+<body>
+    <h1>Welcome to Globalius!</h1>
+    <p>Start guessing the country...</p>
+</body>
+</html>
+
+<!-- Three Js -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive 3D Globe</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+    <canvas id="globeCanvas"></canvas>
+
+    <script>
+        // 1️⃣ Setup Scene, Camera, Renderer
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // 2️⃣ Load Bright Earth Texture
+        const textureLoader = new THREE.TextureLoader();
+        const earthTexture = textureLoader.load('8081_earthmap10k.jpg', // Make sure this path is correct
+            () => console.log("✅ Texture loaded!"),
+            undefined,
+            (err) => console.error("❌ Error loading texture:", err)
+        );
+
+        // 3️⃣ Create Earth Sphere
+        const geometry = new THREE.SphereGeometry(5, 64, 64);
+        const material = new THREE.MeshStandardMaterial({
+            map: earthTexture,
+            emissive: 0x222222, // Adds slight self-lighting
+            roughness: 0.8
+        });
+        const globe = new THREE.Mesh(geometry, material);
+        scene.add(globe);
+
+        // 4️⃣ Add Lighting (Fixes Darkness)
+        const ambientLight = new THREE.AmbientLight(0xffffff, 3); // Soft overall light
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 2); // Simulates sunlight
+        directionalLight.position.set(10, 10, 10);
+        scene.add(directionalLight);
+
+        // 5️⃣ Add OrbitControls (Fixes Background Interaction)
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableZoom = true;
+        controls.enabled = false; // Start disabled (activated only on hover)
+
+        camera.position.z = 10;
+
+        // 6️⃣ Detect Mouse Hover (Enable controls only on globe)
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        window.addEventListener('mousemove', (event) => {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObject(globe);
+
+            controls.enabled = intersects.length > 0; // Enable only if hovering over globe
+        });
+
+        // 7️⃣ Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            globe.rotation.y += 0.001; // Slow rotation
+            renderer.render(scene, camera);
+        }
+        animate();
+        
+    </script>
+</body>
+</html>
+
+const earthTexture = textureLoader.load('https://example.com/earth_image.jpg', // External image
+    () => console.log("✅ Texture loaded!"),
+    undefined,
+    (err) => console.error("❌ Error loading texture:", err)
+);
